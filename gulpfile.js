@@ -39,13 +39,13 @@ var paths = config.paths;
 
 
 gulp.task('sassCompile', [], function() {
-    return gulp.src('./scss/main.scss')
+    return gulp.src(__dirname + '/scss/main.scss')
         .pipe(sass())
         .pipe(gulp.dest(paths.dest));
 });
 
 gulp.task('layoutCopy', [], function() {
-    return gulp.src(['./layout.html', './node_modules/highlight.js/styles/github.css'])
+    return gulp.src([__dirname + '/layout.html', __dirname + '/node_modules/highlight.js/styles/github.css'])
         .pipe(gulp.dest(paths.dest));
 });
 
