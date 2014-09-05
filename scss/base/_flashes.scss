@@ -1,0 +1,24 @@
+%flash-alert {
+  @include flash($alert-color);
+}
+
+%flash-error {
+  @include flash($error-color);
+}
+
+%flash-notice {
+  @include flash($notice-color);
+}
+
+%flash-success {
+  @include flash($success-color);
+}
+
+.warning {
+  :before {
+    content: 'Warning';
+    display: block;
+    font-size: $base-font-size*1.25;
+  }
+  @include flash($alert-color);
+}

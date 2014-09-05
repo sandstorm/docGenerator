@@ -1,0 +1,7 @@
+source 'https://rubygems.org'
+
+# we cannot use Bourbon 4.0 yet
+# https://github.com/thoughtbot/bourbon/issues/375
+gem 'bourbon', '~>3.2.3'
+gem 'neat', '~>1.5.0'
+gem 'bitters'

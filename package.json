@@ -1,0 +1,18 @@
+{
+  "dependencies": {
+    "gulp": "^3.8.7",
+    "gulp-changed": "^1.0.0",
+    "gulp-data": "^1.0.2",
+    "gulp-flatten": "0.0.2",
+    "gulp-insert": "^0.4.0",
+    "gulp-markdown": "^1.0.0",
+    "gulp-replace": "^0.4.0",
+    "gulp-sass": "^0.7.3",
+    "gulp-source-comment-extract": "git://github.com/sandstorm/gulp-source-comment-extract.git#master",
+    "gulp-swig": "^0.7.2",
+    "gulp-toc": "^0.1.0",
+    "gulp-util": "^3.0.1",
+    "highlight.js": "^8.2.0",
+    "marked": "^0.3.2"
+  }
+}

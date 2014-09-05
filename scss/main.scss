@@ -1,0 +1,28 @@
+@import "bourbon/bourbon";
+@import "neat/neat";
+@import "base/base";
+
+body {
+  @include outer-container;
+  nav { @include span-columns(3); }
+  article {
+    @include span-columns(9);
+    max-width: 500px; // best readability happens when there are less than 75 characters per line
+
+
+    figure {
+      background: $light-gray;
+      margin: 0;
+      padding: 10px;
+
+      figcaption {
+        font-weight: bold;
+      }
+    }
+  }
+
+  @include media($mobile-screen) {
+    nav { @include span-columns(12); }
+    article { @include span-columns(12); }
+  }
+}
