@@ -21,6 +21,7 @@
     "gulp-toc": "^0.1.0",
     "gulp-util": "^3.0.1",
     "highlight.js": "^8.2.0",
-    "marked": "^0.3.2"
+    "marked": "^0.3.2",
+    "gulp-rename": "^1.2.0"
   }
 }
