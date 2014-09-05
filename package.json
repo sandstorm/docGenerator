@@ -1,4 +1,12 @@
 {
+  "name": "docGenerator",
+  "version": "0.0.1",
+  "description": "Build Documentation from source code comments",
+  "author": {
+    "name": "Sebastian Kurfürst",
+    "url": "http://github.com/sandstorm"
+  },
+  "license": "MIT",
   "dependencies": {
     "gulp": "^3.8.7",
     "gulp-changed": "^1.0.0",
