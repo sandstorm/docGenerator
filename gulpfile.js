@@ -63,8 +63,22 @@ gulp.task('sourceCodeCompile', ['layoutCopy'], function() {
                 }
 
                 var result;
-                if (result = context.followingLineMatches(/^public [a-zA-Z]+ ([a-zA-Z]+)\(/, 4)) {
-                    comment = '## ' + result[1] + '\n\n' + comment;
+                var keyword;
+
+                // extract method name from method declaration
+                if (result = context.followingLineMatches(/^(public\s+)?(static\s+)?\w+\s+(\w+)\(/, 4)) {
+                    keyword = result[3];
+                    comment = '## ' + keyword + '\n\n' + comment;
+                }
+
+                // extract execution context of the passed closure
+                // !!! NOTE: currently supports at most ONE closure as argument !!!
+                if (result = context.followingLineMatches(/@DelegatesTo\([^\)]*value\s*=\s*(\w+)[^\)]*\)\s*Closure/, 4)) {
+                    comment += '\n See the [' + result[1] + '](' + result[1] + '.html)-reference for a list of valid keywords';
+                    if(keyword) {
+                        comment += ' inside `' + keyword + '`';
+                    }
+                    comment += '.'
                 }
 
                 return comment;
