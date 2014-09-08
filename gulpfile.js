@@ -65,9 +65,9 @@ gulp.task('sourceCodeCompile', ['layoutCopy'], function() {
                 var result;
                 var keyword;
 
-                // extract method name from method declaration
-                if (result = context.followingLineMatches(/^(public\s+)?(static\s+)?\w+\s+(\w+)\(/, 4)) {
-                    keyword = result[3];
+                // extract method or property name from declaration
+                if (result = context.followingLineMatches(/^((public|static|final)\s+)*\w+\s+(\w+)/, 4)) {
+                    keyword = result[result.length-1];
                     // translate property name if is getter
                     if(keyword.indexOf('get') === 0) {
                         keyword = keyword.substr(3);
