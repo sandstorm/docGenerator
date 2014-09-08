@@ -80,6 +80,12 @@ gulp.task('sourceCodeCompile', ['layoutCopy'], function() {
                     comment = '## ' + keyword + '\n\n' + comment;
                 }
 
+                // link base class
+                if (result = context.followingLineMatches(/((def|abstract|public|static|final)\s+)*class\s+\w+(<[^<>]+>)?\s+extends\s+(\w+)(<[^<>]+>)?/, 4)) {
+                    var baseClass = result[result.length - 2]
+                    comment += '\n See the [' + baseClass + '](' + baseClass + '.html)-reference for a list of inherited keywords.';
+                }
+
                 // extract execution context of the passed closure
                 // !!! NOTE: currently supports at most ONE closure as argument !!!
                 if (result = context.followingLineMatches(/@DelegatesTo\([^\)]*value\s*=\s*(\w+)[^\)]*\)\s*Closure/, 4)) {
