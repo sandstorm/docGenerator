@@ -68,6 +68,15 @@ gulp.task('sourceCodeCompile', ['layoutCopy'], function() {
                 // extract method name from method declaration
                 if (result = context.followingLineMatches(/^(public\s+)?(static\s+)?\w+\s+(\w+)\(/, 4)) {
                     keyword = result[3];
+                    // translate property name if is getter
+                    if(keyword.indexOf('get') === 0) {
+                        keyword = keyword.substr(3);
+                        // lower case MyFancyProperty from getMyFancyProperty
+                        // do not lower case MYUPPERCASEPROPERTY from getMYUPPERCASEPROPERTY
+                        if(keyword.match(/[a-z]+/)) {
+                            keyword = keyword.substr(0, 1).toLocaleLowerCase() + keyword.substr(1);
+                        }
+                    }
                     comment = '## ' + keyword + '\n\n' + comment;
                 }
 
