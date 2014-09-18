@@ -59,7 +59,7 @@ gulp.task('layoutCopy', [], function() {
  * The information is used to link only existing target files.
  */
 gulp.task('collectTargets', [], function() {
-    gulp.src(paths.sourceCode)
+    return gulp.src(paths.sourceCode)
         .pipe(flatten())
         .pipe(rename({extname: '.html'}))
         .pipe(through.obj(function(file, enc, cb) {
@@ -137,6 +137,8 @@ gulp.task('sourceCodeCompile', ['layoutCopy', 'collectTargets'], function() {
         .pipe(replace('!non-api!', '> %warning% This part does not belong to the public API and might change without further notice!\n\nDo not use this in production!'))
         .pipe(replace('!since5.1!', '\n\nIntroduced in **Version 5.1**.\n\n'))
         .pipe(rename({extname: '.md'}))
+        .pipe(insert.append("\n\n## Other DSL-References\n\n"))
+        .pipe(insert.append(createMdLinks(targetFiles)))
         .pipe(gulp.dest(paths.dest))
         .pipe(markdown({
             highlight: function (code) {
@@ -152,6 +154,15 @@ gulp.task('sourceCodeCompile', ['layoutCopy', 'collectTargets'], function() {
         .pipe(swig())
         .pipe(gulp.dest(paths.dest));
 });
+
+function createMdLinks(targetFiles) {
+    var mdLinks = "";
+    for(var targetFile in targetFiles) {
+        var basename = targetFile.substring(0, targetFile.lastIndexOf('.'));
+        mdLinks += "* " + reference(basename, targetFile) + "\n"
+    }
+    return mdLinks;
+}
 
 function reference(name, target) {
     // link only existing targets
