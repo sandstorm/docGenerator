@@ -1,24 +1,45 @@
 %flash-alert {
-  @include flash($alert-color);
+    @include flash($alert-color);
 }
 
 %flash-error {
-  @include flash($error-color);
+    @include flash($error-color);
 }
 
 %flash-notice {
-  @include flash($notice-color);
+    @include flash($notice-color);
 }
 
 %flash-success {
-  @include flash($success-color);
+    @include flash($success-color);
 }
 
 .warning {
-  >:before {
-    content: 'Warning';
-    display: block;
-    font-size: $base-font-size*1.25;
-  }
-  @include flash($alert-color);
+    > :before {
+        content: 'Warning';
+        display: block;
+        font-size: $base-font-size*1.25;
+    }
+
+    @include flash($alert-color);
+}
+
+.deprecated {
+    > :before {
+        content: 'Deprecated';
+        display: block;
+        font-size: $base-font-size*1.25;
+    }
+
+    @include flash($alert-color);
+}
+
+.fix {
+    > :before {
+        content: 'Fix';
+        display: block;
+        font-size: $base-font-size*1.25;
+    }
+
+    @include flash($success-color);
 }

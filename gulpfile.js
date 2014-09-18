@@ -83,6 +83,10 @@ gulp.task('sourceCodeCompile', ['layoutCopy', 'collectTargets'], function() {
         .pipe(flatten())
         //.pipe(changed(paths.dest))
         .pipe(docGenPlugin('groovy', {
+            // we want the deprecation messages from the javaDoc
+            // so we skip all line starting with '@' unless followed by 'deprecated'
+            // see http://stackoverflow.com/questions/406230/regular-expression-to-match-string-not-containing-a-word
+            'skipCommentLinesMatchingRegex': '^@(?!deprecated).*',
             'commentPostprocessor': function(comment, context) {
                 if (!context.followingLineIs('@API', 4) && comment.indexOf('!non-api!') === -1) {
                     // skip blocks which do not have an API annotation, except if they contain "!non-api!"
@@ -105,6 +109,29 @@ gulp.task('sourceCodeCompile', ['layoutCopy', 'collectTargets'], function() {
                         }
                     }
                     comment = '## ' + keyword + '\n\n' + comment;
+                }
+
+                // convert javaDoc @deprecated and @DeprecatedSince
+                if (result = comment.match(/@deprecated (.*)/)) {
+                    var deprecatedSinceMatch = context.followingLineMatches(/^@DeprecatedSince\([^\)]*version\s+=\s+(("([^"]*)")|('([^']*)'))[^\)]*\)/, 4);
+                    var deprecatedSince = undefined;
+                    if (deprecatedSinceMatch) {
+                        if (deprecatedSinceMatch[3]) {
+                            deprecatedSince = deprecatedSinceMatch[3]
+                        }
+                        if (deprecatedSinceMatch[5]) {
+                            deprecatedSince = deprecatedSinceMatch[5]
+                        }
+                    }
+
+                    var deprecationWarning = '> %deprecated% This part of the API is marked **deprecated';
+                    if (deprecatedSince) {
+                        deprecationWarning += ' since version ' + deprecatedSince;
+                    }
+                    deprecationWarning += '** and will be removed soon.';
+                    var deprecationFix = '> %fix% ' + result[1];
+
+                    comment = comment.replace(result[0], deprecationWarning + '\n\n<!-- -->\n\n' + deprecationFix + '\n\n')
                 }
 
                 // convert javaDoc links
