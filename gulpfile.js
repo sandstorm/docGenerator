@@ -135,10 +135,17 @@ gulp.task('sourceCodeCompile', ['layoutCopy', 'collectTargets'], function() {
                 }
 
                 // convert javaDoc links
-                while (/(\{@link\s+(\S+\.)*(\w+)\})/.test(comment)) {
+                while (/(\{@link\s+(\S+\.)*(\w+)(#(\w+)[^\}]*)?\})/.test(comment)) {
                     var link = RegExp.$1
-                    var target = RegExp.$3
-                    comment = comment.replace(link, reference(target, target + '.html'))
+                    var targetType = RegExp.$3
+                    var targetMember = RegExp.$5
+                    var linkText = targetType;
+                    var linkTarget = targetType + '.html';
+                    if(targetMember) {
+                        linkText += "#" + targetMember;
+                        linkTarget += "#" + targetMember;
+                    }
+                    comment = comment.replace(link, reference(linkText, linkTarget))
                 }
 
                 // link base class
@@ -192,8 +199,13 @@ function createMdLinks(targetFiles) {
 }
 
 function reference(name, target) {
+    var sharpIndex = target.indexOf('#');
+    var file = target;
+    if (sharpIndex >= 0) {
+        file = target.substr(0, sharpIndex);
+    }
     // link only existing targets
-    if(targetFiles[target]) {
+    if (targetFiles[file]) {
         return '[' + name + '](' + target + ')';
     }
     return name
