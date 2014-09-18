@@ -12,6 +12,7 @@ var flatten = require('gulp-flatten');
 var toc = require('gulp-toc');
 var renderer = require('./src/renderer');
 var util = require('gulp-util');
+var through = require('through2');
 
 gulp.task('default', ['sassCompile', 'sourceCodeCompile'], function() {
     // place code for your default task here
@@ -36,6 +37,7 @@ if (!config.paths) {
 };*/
 
 var paths = config.paths;
+var targetFiles = {};
 
 
 gulp.task('sassCompile', [], function() {
@@ -49,9 +51,34 @@ gulp.task('layoutCopy', [], function() {
         .pipe(gulp.dest(paths.dest));
 });
 
+/**
+ * This gulp-target collects all names of the html files
+ * which are generated even before they are actually created.
+ *
+ * The list of file is stored into a global object (as a mapping).
+ * The information is used to link only existing target files.
+ */
+gulp.task('collectTargets', [], function() {
+    gulp.src(paths.sourceCode)
+        .pipe(flatten())
+        .pipe(rename({extname: '.html'}))
+        .pipe(through.obj(function(file, enc, cb) {
+            if (file.isStream()) {
+                this.emit('error', 'Streams are not supported!');
+                return cb();
+            }
 
+            var filename = file.path.substring(file.path.lastIndexOf('/') + 1);
+            targetFiles[filename] = true;
 
-gulp.task('sourceCodeCompile', ['layoutCopy'], function() {
+            // make sure the file goes through the next gulp plugin
+            this.push(file);
+            // tell the stream engine that we are done with this file
+            return cb();
+        }));
+});
+
+gulp.task('sourceCodeCompile', ['layoutCopy', 'collectTargets'], function() {
     return gulp.src(paths.sourceCode)
         .pipe(flatten())
         //.pipe(changed(paths.dest))
@@ -80,6 +107,13 @@ gulp.task('sourceCodeCompile', ['layoutCopy'], function() {
                     comment = '## ' + keyword + '\n\n' + comment;
                 }
 
+                // convert javaDoc links
+                while (/(\{@link\s+(\S+\.)*(\w+)\})/.test(comment)) {
+                    var link = RegExp.$1
+                    var target = RegExp.$3
+                    comment = comment.replace(link, reference(target, target + '.html'))
+                }
+
                 // link base class
                 if (result = context.followingLineMatches(/((def|abstract|public|static|final)\s+)*class\s+\w+(<[^<>]+>)?\s+extends\s+(\w+)(<[^<>]+>)?/, 4)) {
                     var baseClass = result[result.length - 2]
@@ -89,7 +123,7 @@ gulp.task('sourceCodeCompile', ['layoutCopy'], function() {
                 // extract execution context of the passed closure
                 // !!! NOTE: currently supports at most ONE closure as argument !!!
                 if (result = context.followingLineMatches(/@DelegatesTo\([^\)]*value\s*=\s*(\w+)[^\)]*\)\s*Closure/, 4)) {
-                    comment += '\n See the [' + result[1] + '](' + result[1] + '.html)-reference for a list of valid keywords';
+                    comment += '\n See the ' + reference(result[1], result[1] + '.html' ) + '-reference for a list of valid keywords';
                     if(keyword) {
                         comment += ' inside `' + keyword + '`';
                     }
@@ -118,6 +152,14 @@ gulp.task('sourceCodeCompile', ['layoutCopy'], function() {
         .pipe(swig())
         .pipe(gulp.dest(paths.dest));
 });
+
+function reference(name, target) {
+    // link only existing targets
+    if(targetFiles[target]) {
+        return '[' + name + '](' + target + ')';
+    }
+    return name
+}
 
 // Rerun the task when a file changes
 gulp.task('watch', function() {
