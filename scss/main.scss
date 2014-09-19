@@ -3,32 +3,40 @@
 @import "base/base";
 
 body {
-  @include outer-container;
-  nav {
-      @include span-columns(3);
-      position: fixed;
-  }
-  article {
-    @include span-columns(9);
-    max-width: 500px; // best readability happens when there are less than 75 characters per line
-    margin-left: 200px;
-
-    figure {
-      background: $light-gray;
-      margin-top: 10px;
-      margin-bottom: 10px;
-      margin-left: 0;
-      margin-right: 0;
-      padding: 10px;
-
-      figcaption {
-        font-weight: bold;
-      }
+    @include outer-container;
+    nav {
+        @include span-columns(3);
+        position: fixed;
     }
-  }
+    article {
+        @include span-columns(9);
+        max-width: 500px; // best readability happens when there are less than 75 characters per line
+        margin-left: 200px;
 
-  @include media($mobile-screen) {
-    nav { @include span-columns(12); }
-    article { @include span-columns(12); }
-  }
+        figure {
+            background: $light-gray;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            margin-left: 0;
+            margin-right: 0;
+            padding: 10px;
+
+            figcaption {
+                font-weight: bold;
+            }
+        }
+
+        .hljs-comment {
+            color: green;
+        }
+    }
+
+    @include media($mobile-screen) {
+        nav {
+            @include span-columns(12);
+        }
+        article {
+            @include span-columns(12);
+        }
+    }
 }

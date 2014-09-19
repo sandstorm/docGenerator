@@ -43,3 +43,13 @@
 
     @include flash($success-color);
 }
+
+.note {
+    > :before {
+        content: 'Note that';
+        display: block;
+        font-size: $base-font-size*1.25;
+    }
+
+    @include flash($hint-color);
+}

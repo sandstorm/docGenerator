@@ -97,17 +97,8 @@ gulp.task('sourceCodeCompile', ['layoutCopy', 'collectTargets'], function() {
                 var keyword;
 
                 // extract method or property name from declaration
-                if (result = context.followingLineMatches(/^((def|abstract|public|static|final)\s+)*\S+\s+(\w+)/, 4)) {
-                    keyword = result[result.length-1];
-                    // translate property name if is getter
-                    if(keyword.indexOf('get') === 0) {
-                        keyword = keyword.substr(3);
-                        // lower case MyFancyProperty from getMyFancyProperty
-                        // do not lower case MYUPPERCASEPROPERTY from getMYUPPERCASEPROPERTY
-                        if(keyword.match(/[a-z]+/)) {
-                            keyword = keyword.substr(0, 1).toLocaleLowerCase() + keyword.substr(1);
-                        }
-                    }
+                if (result = context.followingLineMatches(/^((def|abstract|public|protected|static|final)\s+)*\w+(<[^<>]+>)?\s+(\w+)/, 4)) {
+                    keyword = normalizeMemberName(result[result.length - 1]);
                     comment = '## ' + keyword + '\n\n' + comment;
                 }
 
@@ -142,8 +133,9 @@ gulp.task('sourceCodeCompile', ['layoutCopy', 'collectTargets'], function() {
                     var linkText = targetType;
                     var linkTarget = targetType + '.html';
                     if(targetMember) {
+                        targetMember = normalizeMemberName(targetMember);
                         linkText += "#" + targetMember;
-                        linkTarget += "#" + targetMember;
+                        linkTarget += "#" + targetMember.toLowerCase();
                     }
                     comment = comment.replace(link, reference(linkText, linkTarget))
                 }
@@ -188,6 +180,19 @@ gulp.task('sourceCodeCompile', ['layoutCopy', 'collectTargets'], function() {
         .pipe(swig())
         .pipe(gulp.dest(paths.dest));
 });
+
+function normalizeMemberName(name) {
+    // translate property name if is getter
+    if (name.indexOf('get') === 0) {
+        name = name.substr(3);
+        // lower case MyFancyProperty from getMyFancyProperty
+        // do not lower case MYUPPERCASEPROPERTY from getMYUPPERCASEPROPERTY
+        if (name.match(/[a-z]+/)) {
+            name = name.substr(0, 1).toLocaleLowerCase() + name.substr(1);
+        }
+    }
+    return name
+}
 
 function createMdLinks(targetFiles) {
     var mdLinks = "";
