@@ -19,10 +19,12 @@ renderer.code = function(code, lang, escaped) {
 
     var result = marked.Renderer.prototype.code.call(this, code, lang, escaped);
 
+    var htmlResult = '<figure>'
     if (titleMatch) {
-        result = '<figure><figcaption>' + titleMatch[1] + '</figcaption>' + result + '</figure>';
+        htmlResult += '<figcaption>' + titleMatch[1] + '</figcaption>';
     }
-    return result;
+    htmlResult += result + '</figure>'
+    return htmlResult;
 };
 
 module.exports = renderer;

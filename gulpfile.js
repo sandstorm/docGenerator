@@ -1,3 +1,39 @@
+String.prototype.filename = function() {
+    var delimiterIndex = this.lastIndexOf('/');
+    if (delimiterIndex < 0) {
+        return this;
+    }
+    return this.substring(delimiterIndex + 1);
+};
+
+String.prototype.parentPath = function() {
+    var delimiterIndex = this.lastIndexOf('/');
+    if (delimiterIndex < 0) {
+        return '.';
+    }
+    return this.substring(0, delimiterIndex);
+};
+
+String.prototype.basename = function() {
+    var filename = this.filename();
+
+    var delimiterIndex = filename.lastIndexOf('.');
+    if (delimiterIndex < 0) {
+        return filename;
+    }
+    return filename.substring(0, delimiterIndex);
+};
+
+String.prototype.ending = function() {
+    var delimiterIndex = this.lastIndexOf('.');
+    if (delimiterIndex < 0) {
+        return '';
+    }
+    return this.substring(delimiterIndex + 1);
+};
+
+
+
 var gulp = require('gulp');
 var changed = require('gulp-changed');
 var docGenPlugin = require('gulp-source-comment-extract');
@@ -13,8 +49,9 @@ var toc = require('gulp-toc');
 var renderer = require('./src/renderer');
 var util = require('gulp-util');
 var through = require('through2');
+var concat = require('gulp-concat');
 
-gulp.task('default', ['sassCompile', 'sourceCodeCompile'], function() {
+gulp.task('default', ['sassCompile', 'sourceCodeCompile', 'examplesCompile'], function() {
     // place code for your default task here
 });
 
@@ -33,11 +70,18 @@ if (!config.paths) {
     sourceCode: [
         '...'
     ],
+    examples: [
+        '...'
+    ],
     dest: 'tmp'
 };*/
 
+var exampleFile = "predefinedReference.html";
 var paths = config.paths;
 var targetFiles = {};
+if (paths.examples) {
+    targetFiles[exampleFile] = true;
+}
 
 
 gulp.task('sassCompile', [], function() {
@@ -68,7 +112,7 @@ gulp.task('collectTargets', [], function() {
                 return cb();
             }
 
-            var filename = file.path.substring(file.path.lastIndexOf('/') + 1);
+            var filename = file.path.filename();
             targetFiles[filename] = true;
 
             // make sure the file goes through the next gulp plugin
@@ -76,6 +120,83 @@ gulp.task('collectTargets', [], function() {
             // tell the stream engine that we are done with this file
             return cb();
         }));
+});
+
+/**
+ * This tasks collects all examples and publishes them
+ */
+gulp.task('examplesCompile', ['collectTargets'], function () {
+    if (!paths.examples) {
+        return;
+    }
+    return gulp.src(paths.examples)
+        .pipe(flatten())
+        .pipe(through.obj(function(file, enc, cb) {
+            if (file.isStream()) {
+                this.emit('error', 'Streams are not supported!');
+                return cb();
+            }
+
+            var parentName = file.path.parentPath().basename();
+            var basename = file.path.basename();
+            var ending = file.path.ending();
+            var includePath = file.path.substring(file.path.lastIndexOf('/predefined/'));
+
+            switch (ending) {
+                case "md":
+                    file.contents = new Buffer("\n"
+                        + "## " + parentName + "\n"
+                        + "\n"
+                        + file.contents + "\n"
+                        + "\n"
+                    );
+                    break;
+                case "groovy":
+                    file.contents = new Buffer("\n"
+                        + "### " + basename + "\n"
+                        + "\n"
+                        + "```\n"
+                        + file.contents + "\n"
+                        + "```\n"
+                        + "\n"
+                        + "```\n"
+                        + ":title: Example include of this pre-defined file\n"
+                        + "include \"" + includePath + "\"\n"
+                        + "```\n"
+                        + "\n"
+                    );
+                    break;
+                default:
+                    break;
+            }
+
+            // make sure the file goes through the next gulp plugin
+            this.push(file);
+            // tell the stream engine that we are done with this file
+            return cb();
+        }))
+        // make one large example reference file
+        .pipe(concat(exampleFile))
+
+        // compile to HTML as in sourceCodeCompile
+        // TODO: 100 % copy-paste-code from sourceCodeCompile => refactor
+        .pipe(rename({extname: '.md'}))
+        .pipe(insert.append("\n\n## Other DSL-References\n\n"))
+        .pipe(insert.append(createMdLinks(targetFiles)))
+        .pipe(gulp.dest(paths.dest))
+        .pipe(markdown({
+            highlight: function (code) {
+                return highlight.highlight("groovy", code).value;
+            },
+            renderer: renderer
+        }))
+        .pipe(rename({extname: '.html'}))
+
+        .pipe(insert.prepend("{% extends 'layout.html' %} {% block toc %} <!-- toc --> {% endblock %} {% block content %}"))
+        .pipe(insert.append("{% endblock %}"))
+        .pipe(toc())
+        .pipe(swig())
+        .pipe(gulp.dest(paths.dest));
 });
 
 gulp.task('sourceCodeCompile', ['layoutCopy', 'collectTargets'], function() {
