@@ -76,7 +76,7 @@ if (!config.paths) {
     dest: 'tmp'
 };*/
 
-var exampleFile = "predefinedReference.html";
+var exampleFile = "PredefinedScripts.html";
 var paths = config.paths;
 var targetFiles = {};
 if (paths.examples) {

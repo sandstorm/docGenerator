@@ -6,12 +6,10 @@ body {
     @include outer-container;
     nav {
         @include span-columns(3);
-        position: fixed;
     }
     article {
         @include span-columns(9);
         max-width: 500px; // best readability happens when there are less than 75 characters per line
-        margin-left: 200px;
 
         figure {
             background: $light-gray;
