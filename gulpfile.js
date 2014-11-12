@@ -283,6 +283,7 @@ gulp.task('sourceCodeCompile', ['layoutCopy', 'collectTargets'], function() {
         }))
         .pipe(replace('!non-api!', '> %warning% This part does not belong to the public API and might change without further notice!\n\nDo not use this in production!'))
         .pipe(replace('!since5.1!', '\n\nIntroduced in **Version 5.1**.\n\n'))
+        .pipe(replace('!since5.2!', '\n\nIntroduced in **Version 5.2**.\n\n'))
         .pipe(rename({extname: '.md'}))
         .pipe(insert.append("\n\n## Other DSL-References\n\n"))
         .pipe(insert.append(createMdLinks(targetFiles)))
