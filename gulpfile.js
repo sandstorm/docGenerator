@@ -287,6 +287,8 @@ gulp.task('sourceCodeCompile', ['layoutCopy', 'collectTargets'], function() {
         .pipe(replace('!since5.3!', '\n\nIntroduced in **Version 5.3**.\n\n'))
         .pipe(replace('!since5.4!', '\n\nIntroduced in **Version 5.4**.\n\n'))
         .pipe(replace('!since5.5!', '\n\nIntroduced in **Version 5.5**.\n\n'))
+        .pipe(replace('!since5.6!', '\n\nIntroduced in **Version 5.6**.\n\n'))
+        .pipe(replace('!since5.7!', '\n\nIntroduced in **Version 5.7**.\n\n'))
         .pipe(rename({extname: '.md'}))
         .pipe(insert.append("\n\n## Other DSL-References\n\n"))
         .pipe(insert.append(createMdLinks(targetFiles)))
